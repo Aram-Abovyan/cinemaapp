@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Booking {
+  id         Int      @id @default(autoincrement())
+  schedule   Schedule @relation(fields: [scheduleId], references: [id])
+  scheduleId Int
+  seat       Seat     @relation(fields: [seatId], references: [id])
+  seatId     Int
+
+  @@unique([scheduleId, seatId])
+}
+
+model Schedule {
+  id         Int       @id @default(autoincrement())
+  startingAt DateTime
+  bookings   Booking[]
+  room       Room      @relation(fields: [roomId], references: [id])
+  roomId     Int
+  movie      Movie     @relation(fields: [movieId], references: [id])
+  movieId    Int
+}
+
+model Movie {
+  id        Int        @id @default(autoincrement())
+  name      String
+  avatar    String?
+  duration  Int
+  schedules Schedule[]
+}
+
+model Seat {
+  id      Int      @id @default(autoincrement())
+  column  Int
+  row     Int
+  bookings Booking[]
+  room    Room     @relation(fields: [roomId], references: [id])
+  roomId  Int
+}
+
+model Room {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  schedules Schedule[]
+  seats     Seat[]
+}
